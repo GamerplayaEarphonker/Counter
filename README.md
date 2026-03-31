@@ -1,35 +1,37 @@
 Variables for Counter:
 
--- Start
+ -- Start
 
--- End
+ -- End
   
--- Duration
+ -- Duration
   
--- Countdown
+ -- Countdown
 
--- Easing
+ -- Easing (In / Out)
   
 Variables for Timer:
 
--- Seconds
+ -- Seconds
 
--- Minutes
+ -- Minutes
 
--- Hours
+ -- Hours
 
--- Clock
+ -- Clock
 
--- 24h Clock
+ -- 24h Clock
 
--- Stopwatch
+ -- Stopwatch
 
 Variables for Style:
 
--- Font
+ -- Font
 
--- Font Weight
+ -- Font Weight
 
--- Background Color
+ -- Italic
 
--- Text Color
+ -- Background Color
+
+ -- Text Color
