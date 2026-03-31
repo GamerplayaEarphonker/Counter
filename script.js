@@ -88,13 +88,16 @@ document.addEventListener('keydown', function(e) {
         isFullscreen = !isFullscreen;
         if (isFullscreen) {
             container.classList.add('fullscreen');
+            document.body.classList.add('fullscreen-active');
         } else {
             container.classList.remove('fullscreen');
+            document.body.classList.remove('fullscreen-active');
         }
     } else if (e.key === 'Escape') {
         if (isFullscreen) {
             isFullscreen = false;
             container.classList.remove('fullscreen');
+            document.body.classList.remove('fullscreen-active');
         }
     } else if (e.key === ' ' || e.key === 'Space') {
         e.preventDefault();
