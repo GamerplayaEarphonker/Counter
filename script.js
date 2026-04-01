@@ -416,18 +416,28 @@ renderBtn.addEventListener('click', async function() {
     canvas.height = height;
     
     const stream = canvas.captureStream(60);
+    
+    let mimeType = 'video/webm;codecs=vp9';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'video/mp4';
+        }
+    }
+    
     const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9'
+        mimeType: mimeType
     });
     
     const chunks = [];
     mediaRecorder.ondataavailable = e => chunks.push(e.data);
     mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+        const blob = new Blob(chunks, { type: mimeType });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'counting-video.webm';
+        a.download = `counting-video.${ext}`;
         a.click();
         URL.revokeObjectURL(url);
     };
