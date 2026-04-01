@@ -165,6 +165,14 @@ document.addEventListener('keydown', function(e) {
         } else {
             display.textContent = startNumberInput.value || "0";
         }
+    } else if (e.key === 'r' || e.key === 'R') {
+        if (e.altKey) {
+            e.preventDefault();
+            alert('Render Speed: 60 FPS');
+        } else {
+            e.preventDefault();
+            renderBtn.click();
+        }
     }
 });
 
