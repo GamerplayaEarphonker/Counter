@@ -24,7 +24,12 @@ body {
     width: 100%;
 }
 
-.container.fullscreen {
+body.fullscreen {
+    padding: 0 !important;
+    background: #1a1a2e;
+}
+
+body.fullscreen .container {
     max-width: 100%;
     width: 100%;
     height: 100vh;
@@ -33,18 +38,27 @@ body {
     justify-content: center;
     align-items: center;
     padding: 40px;
+    background: transparent;
+    backdrop-filter: none;
+    box-shadow: none;
 }
 
-.container.fullscreen h1,
-.container.fullscreen .controls {
+body.fullscreen .container h1,
+body.fullscreen .container .controls {
     display: none;
 }
 
-.container.fullscreen #display {
+body.fullscreen .container #display {
     font-size: 30vw;
     width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
-    border: none !important;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
 }
 
 h1 {

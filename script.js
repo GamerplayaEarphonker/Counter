@@ -2,6 +2,7 @@ const display = document.getElementById('display');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const resetBtn = document.getElementById('resetBtn');
+const renderBtn = document.getElementById('renderBtn');
 
 const modeCountingInput = document.getElementById('modeCounting');
 const modeTimerInput = document.getElementById('modeTimer');
@@ -21,7 +22,11 @@ const fontFamilyInput = document.getElementById('fontFamily');
 const fontWeightInput = document.getElementById('fontWeight');
 const fontItalicInput = document.getElementById('fontItalic');
 const displayBackgroundInput = document.getElementById('displayBackground');
+const displayBackgroundHexInput = document.getElementById('displayBackgroundHex');
 const displayTextColorInput = document.getElementById('displayTextColor');
+const displayTextColorHexInput = document.getElementById('displayTextColorHex');
+const renderSizeInput = document.getElementById('renderResolution');
+const renderAspectInput = document.getElementById('renderAspect');
 
 const countingGroup = document.getElementById('countingGroup');
 const timerGroup = document.getElementById('timerGroup');
@@ -48,17 +53,9 @@ function linear(t) {
 }
 
 function updateFont() {
-    let fontFamily = fontFamilyInput.value;
+    const fontFamily = fontFamilyInput.value.trim();
     const fontWeight = fontWeightInput.value;
     const fontItalic = fontItalicInput.checked;
-    
-    fontFamily = fontFamily.split(',').map(font => {
-        font = font.trim();
-        if (font.includes(' ')) {
-            return `'${font}'`;
-        }
-        return font;
-    }).join(', ');
     
     display.style.fontFamily = fontFamily;
     display.style.fontWeight = fontWeight;
@@ -70,15 +67,35 @@ fontWeightInput.addEventListener('input', updateFont);
 fontItalicInput.addEventListener('change', updateFont);
 
 function updateDisplayColors() {
-    const bgColor = displayBackgroundInput.value || 'rgba(0,0,0,0.3)';
-    const txtColor = displayTextColorInput.value || '#00d4ff';
+    const bgColor = displayBackgroundInput.value;
+    const txtColor = displayTextColorInput.value;
+    
+    displayBackgroundHexInput.value = bgColor;
+    displayTextColorHexInput.value = txtColor;
     
     display.style.background = bgColor;
     display.style.color = txtColor;
 }
 
+function updateDisplayColorsFromHex() {
+    const bgHex = displayBackgroundHexInput.value;
+    const txtHex = displayTextColorHexInput.value;
+    
+    if (/^#[0-9A-Fa-f]{6}$/.test(bgHex)) {
+        displayBackgroundInput.value = bgHex;
+    }
+    if (/^#[0-9A-Fa-f]{6}$/.test(txtHex)) {
+        displayTextColorInput.value = txtHex;
+    }
+    
+    display.style.background = displayBackgroundInput.value;
+    display.style.color = displayTextColorInput.value;
+}
+
 displayBackgroundInput.addEventListener('input', updateDisplayColors);
 displayTextColorInput.addEventListener('input', updateDisplayColors);
+displayBackgroundHexInput.addEventListener('input', updateDisplayColorsFromHex);
+displayTextColorHexInput.addEventListener('input', updateDisplayColorsFromHex);
 
 let isFullscreen = false;
 
@@ -87,17 +104,14 @@ document.addEventListener('keydown', function(e) {
         e.preventDefault();
         isFullscreen = !isFullscreen;
         if (isFullscreen) {
-            container.classList.add('fullscreen');
-            document.body.classList.add('fullscreen-active');
+            document.body.classList.add('fullscreen');
         } else {
-            container.classList.remove('fullscreen');
-            document.body.classList.remove('fullscreen-active');
+            document.body.classList.remove('fullscreen');
         }
     } else if (e.key === 'Escape') {
         if (isFullscreen) {
             isFullscreen = false;
-            container.classList.remove('fullscreen');
-            document.body.classList.remove('fullscreen-active');
+            document.body.classList.remove('fullscreen');
         }
     } else if (e.key === ' ' || e.key === 'Space') {
         e.preventDefault();
@@ -359,3 +373,145 @@ resetBtn.addEventListener('click', function() {
 updateGroupStates();
 updateFont();
 updateDisplayColors();
+
+renderBtn.addEventListener('click', async function() {
+    const canvas = document.getElementById('renderCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const resolutionValue = renderSizeInput.value;
+    const [resWidth, resHeight] = resolutionValue.split('x').map(Number);
+    
+    const aspectValue = renderAspectInput.value;
+    let width, height;
+    
+    if (aspectValue === '16x9') {
+        width = resWidth;
+        height = Math.round(resWidth * 9 / 16);
+    } else if (aspectValue === '4x3') {
+        width = resWidth;
+        height = Math.round(resWidth * 3 / 4);
+    } else if (aspectValue === '1x1') {
+        width = resWidth;
+        height = resWidth;
+    } else if (aspectValue === '9x16') {
+        width = resWidth;
+        height = Math.round(resWidth * 16 / 9);
+    } else if (aspectValue === '3x4') {
+        width = resWidth;
+        height = Math.round(resWidth * 4 / 3);
+    } else {
+        width = resWidth;
+        height = Math.round(resWidth * 9 / 16);
+    }
+    
+    canvas.width = width;
+    canvas.height = height;
+    
+    const stream = canvas.captureStream(60);
+    const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9'
+    });
+    
+    const chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'counting-video.webm';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+    
+    const isCounting = modeCountingInput.checked;
+    let startTime = performance.now();
+    let running = true;
+    
+    function drawFrame() {
+        if (!running) return;
+        
+        const elapsed = (performance.now() - startTime) / 1000;
+        
+        let text = '';
+        
+        if (isCounting) {
+            const startNum = parseInt(startNumberInput.value) || 0;
+            const endNum = parseInt(endNumberInput.value) || 100;
+            const duration = parseFloat(durationInput.value) || 5;
+            const easingIn = easingInInput.checked;
+            const easingOut = easingOutInput.checked;
+            const isCountdown = countdownInput.checked;
+            
+            let t = Math.min(elapsed / duration, 1);
+            let easedT;
+            if (easingIn && easingOut) {
+                easedT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            } else if (easingIn) {
+                easedT = t * t;
+            } else if (easingOut) {
+                easedT = 1 - (1 - t) * (1 - t);
+            } else {
+                easedT = t;
+            }
+            
+            const start = isCountdown ? endNum : startNum;
+            const end = isCountdown ? startNum : endNum;
+            text = Math.round(start + (end - start) * easedT).toString();
+        } else {
+            const secondsVal = parseInt(secondsInput.value) || 60;
+            const hoursChecked = hoursInput.checked;
+            const isStopwatch = stopwatchInput.checked;
+            
+            let totalSeconds;
+            if (isStopwatch) {
+                totalSeconds = Math.floor(elapsed);
+            } else {
+                totalSeconds = Math.max(0, secondsVal - Math.floor(elapsed));
+            }
+            
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            if (hoursChecked && hours > 0) {
+                text = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                text = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+        
+        ctx.fillStyle = displayBackgroundInput.value || 'rgba(0,0,0,0.3)';
+        ctx.fillRect(0, 0, width, height);
+        
+        const fontSize = 400;
+        ctx.font = `${fontWeightInput.value} ${fontSize}px ${fontFamilyInput.value}`;
+        ctx.fillStyle = displayTextColorInput.value || '#00d4ff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, width / 2, height / 2);
+        
+        if (elapsed < (isCounting ? parseFloat(durationInput.value) : parseInt(secondsInput.value))) {
+            requestAnimationFrame(drawFrame);
+        } else {
+            running = false;
+            mediaRecorder.stop();
+        }
+    }
+    
+    renderBtn.disabled = true;
+    renderBtn.textContent = 'Rendering...';
+    
+    mediaRecorder.start();
+    drawFrame();
+    
+    const isCountingMode = modeCountingInput.checked;
+    const durationSec = isCountingMode 
+        ? parseFloat(durationInput.value) 
+        : parseInt(secondsInput.value);
+    
+    setTimeout(() => {
+        renderBtn.disabled = false;
+        renderBtn.textContent = 'Render';
+    }, durationSec * 1000 + 500);
+});

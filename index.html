@@ -85,7 +85,7 @@
                 
                 <div class="field">
                     <label for="fontFamily">Font Family:</label>
-                    <input type="text" id="fontFamily" value="Arial" placeholder="Arial, Helvetica, sans-serif">
+                    <input type="text" id="fontFamily" value="Arial" placeholder="Open Sans">
                 </div>
                 
                 <div class="field">
@@ -100,21 +100,48 @@
                 </div>
 
                 <div class="field">
-                    <label for="displayBackground">Background:</label>
-                    <input type="text" id="displayBackground" value="rgba(0,0,0,0.3)" placeholder="#000000 or rgba(0,0,0,0.3)">
+                    <label>Background:</label>
+                    <input type="color" id="displayBackground" value="#000000">
+                    <input type="text" id="displayBackgroundHex" value="#000000" placeholder="#000000">
                 </div>
                 
                 <div class="field">
-                    <label for="displayTextColor">Text Color:</label>
-                    <input type="text" id="displayTextColor" value="#00d4ff" placeholder="#00d4ff or rgb(0,212,255)">
+                    <label>Text Color:</label>
+                    <input type="color" id="displayTextColor" value="#00d4ff">
+                    <input type="text" id="displayTextColorHex" value="#00d4ff" placeholder="#00d4ff">
+                </div>
+                <div class="field">
+                    <label for="renderAspect">Aspect Ratio:</label>
+                    <select id="renderAspect">
+                        <option value="16x9" selected>16:9</option>
+                        <option value="4x3">4:3</option>
+                        <option value="1x1">1:1</option>
+                        <option value="9x16">9:16 (Portrait)</option>
+                        <option value="3x4">3:4 (Portrait)</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="renderSize">Resolution:</label>
+                    <select id="renderResolution">
+                        <option value="426x240">240p</option>
+                        <option value="640x360">360p</option>
+                        <option value="854x480">480p</option>
+                        <option value="1280x720" selected>720p</option>
+                        <option value="1920x1080">1080p</option>
+                        <option value="2560x1440">1440p</option>
+                    </select>
                 </div>
             </div>
             
             <button id="startBtn">Start</button>
             <button id="stopBtn">Stop</button>
             <button id="resetBtn">Reset</button>
+            <button id="renderBtn">Render</button>
         </div>
     </div>
+    
+    <canvas id="renderCanvas" style="display: none;"></canvas>
     
     <script src="script.js"></script>
 </body>
