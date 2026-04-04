@@ -20,11 +20,12 @@ const completeInput = document.getElementById('complete');
 const stopwatchInput = document.getElementById('stopwatch');
 const fontFamilyInput = document.getElementById('fontFamily');
 const fontWeightInput = document.getElementById('fontWeight');
+const fontSizeInput = document.getElementById('fontSize');
 const fontItalicInput = document.getElementById('fontItalic');
 const displayBackgroundInput = document.getElementById('displayBackground');
-const displayBackgroundHexInput = document.getElementById('displayBackgroundHex');
+const displayBackgroundColorInput = document.getElementById('displayBackgroundColor');
 const displayTextColorInput = document.getElementById('displayTextColor');
-const displayTextColorHexInput = document.getElementById('displayTextColorHex');
+const displayTextColorColorInput = document.getElementById('displayTextColorColor');
 const renderSizeInput = document.getElementById('renderResolution');
 const renderAspectInput = document.getElementById('renderAspect');
 
@@ -55,51 +56,57 @@ function linear(t) {
 function updateFont() {
     const fontFamily = fontFamilyInput.value.trim();
     const fontWeight = fontWeightInput.value;
+    const fontSize = fontSizeInput.value;
     const fontItalic = fontItalicInput.checked;
     
     display.style.fontFamily = fontFamily;
     display.style.fontWeight = fontWeight;
+    display.style.fontSize = fontSize + 'px';
     display.style.fontStyle = fontItalic ? 'italic' : 'normal';
 }
 
 fontFamilyInput.addEventListener('input', updateFont);
 fontWeightInput.addEventListener('input', updateFont);
+fontSizeInput.addEventListener('input', updateFont);
 fontItalicInput.addEventListener('change', updateFont);
 
 function updateDisplayColors() {
     const bgColor = displayBackgroundInput.value;
     const txtColor = displayTextColorInput.value;
     
-    displayBackgroundHexInput.value = bgColor;
-    displayTextColorHexInput.value = txtColor;
+    displayBackgroundColorInput.value = bgColor;
+    displayTextColorColorInput.value = txtColor;
     
     display.style.background = bgColor;
     display.style.color = txtColor;
 }
 
-function updateDisplayColorsFromHex() {
-    const bgHex = displayBackgroundHexInput.value;
-    const txtHex = displayTextColorHexInput.value;
+function updateDisplayColorsFromPicker() {
+    const bgColor = displayBackgroundColorInput.value;
+    const txtColor = displayTextColorColorInput.value;
     
-    if (/^#[0-9A-Fa-f]{6}$/.test(bgHex)) {
-        displayBackgroundInput.value = bgHex;
-    }
-    if (/^#[0-9A-Fa-f]{6}$/.test(txtHex)) {
-        displayTextColorInput.value = txtHex;
-    }
+    displayBackgroundInput.value = bgColor;
+    displayTextColorInput.value = txtColor;
     
-    display.style.background = displayBackgroundInput.value;
-    display.style.color = displayTextColorInput.value;
+    display.style.background = bgColor;
+    display.style.color = txtColor;
 }
 
 displayBackgroundInput.addEventListener('input', updateDisplayColors);
 displayTextColorInput.addEventListener('input', updateDisplayColors);
-displayBackgroundHexInput.addEventListener('input', updateDisplayColorsFromHex);
-displayTextColorHexInput.addEventListener('input', updateDisplayColorsFromHex);
+displayBackgroundColorInput.addEventListener('input', updateDisplayColorsFromPicker);
+displayTextColorColorInput.addEventListener('input', updateDisplayColorsFromPicker);
 
 let isFullscreen = false;
 
 document.addEventListener('keydown', function(e) {
+    const target = e.target;
+    const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+    
+    if (isTyping && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        return;
+    }
+    
     if (e.key === 'F11') {
         e.preventDefault();
         isFullscreen = !isFullscreen;
@@ -499,10 +506,10 @@ renderBtn.addEventListener('click', async function() {
             }
         }
         
-        ctx.fillStyle = displayBackgroundInput.value || 'rgba(0,0,0,0.3)';
+        ctx.fillStyle = displayBackgroundInput.value || '#000000';
         ctx.fillRect(0, 0, width, height);
         
-        const fontSize = 400;
+        const fontSize = Math.round(width / 4);
         ctx.font = `${fontWeightInput.value} ${fontSize}px ${fontFamilyInput.value}`;
         ctx.fillStyle = displayTextColorInput.value || '#00d4ff';
         ctx.textAlign = 'center';
