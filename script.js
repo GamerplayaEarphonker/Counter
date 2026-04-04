@@ -56,19 +56,24 @@ function linear(t) {
 function updateFont() {
     const fontFamily = fontFamilyInput.value.trim();
     const fontWeight = fontWeightInput.value;
-    const fontSize = fontSizeInput.value;
     const fontItalic = fontItalicInput.checked;
     
     display.style.fontFamily = fontFamily;
     display.style.fontWeight = fontWeight;
-    display.style.fontSize = fontSize + 'px';
     display.style.fontStyle = fontItalic ? 'italic' : 'normal';
+}
+
+function updateFullscreenFontSize() {
+    if (isFullscreen) {
+        const fontSize = fontSizeInput.value;
+        display.style.fontSize = fontSize + 'px';
+    }
 }
 
 fontFamilyInput.addEventListener('input', updateFont);
 fontWeightInput.addEventListener('input', updateFont);
-fontSizeInput.addEventListener('input', updateFont);
 fontItalicInput.addEventListener('change', updateFont);
+fontSizeInput.addEventListener('input', updateFullscreenFontSize);
 
 function updateDisplayColors() {
     const bgColor = displayBackgroundInput.value;
@@ -112,13 +117,16 @@ document.addEventListener('keydown', function(e) {
         isFullscreen = !isFullscreen;
         if (isFullscreen) {
             document.body.classList.add('fullscreen');
+            updateFullscreenFontSize();
         } else {
             document.body.classList.remove('fullscreen');
+            display.style.fontSize = '';
         }
     } else if (e.key === 'Escape') {
         if (isFullscreen) {
             isFullscreen = false;
             document.body.classList.remove('fullscreen');
+            display.style.fontSize = '';
         }
     } else if (e.key === ' ' || e.key === 'Space') {
         e.preventDefault();

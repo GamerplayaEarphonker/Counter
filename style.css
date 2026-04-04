@@ -49,7 +49,6 @@ body.fullscreen .container .controls {
 }
 
 body.fullscreen .container #display {
-    font-size: 30vw;
     width: 100%;
     height: 100vh;
     display: flex;
